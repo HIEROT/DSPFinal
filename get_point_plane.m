@@ -1,5 +1,7 @@
 function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
     sampleRate,freqSlopeConst,numChirps)
+% clc;clear all;close all;
+% load data2p.mat
 
 % input1: rxData - [numAdcSamples,numChirps]
 
@@ -20,55 +22,50 @@ R = zeros(4,4);
 for i = 1 : cnt
     R = R + X(:,i)*X(:,i)'/cnt;
 end
-w = zeros(4,121);
-for i = -60 : 60
+w = zeros(4,181);
+p = zeros(1,181);
+for i = -90 : 90
     theta = i/180*pi;
     del = 2*pi*len*sin(theta)/lambda;
     a = [1, exp(1j*del), exp(2j*del), exp(3j*del)];
-    w(:,i+61) = inv(R)*a'/(a*inv(R)*a');
-    t = 0;
-    for j = 1 : 4
-        t = t + abs(w(j,i+61))^2;
-    end
-    w(:,i+61) = w(:,i+61)/sqrt(t);
+    p(i+91) = abs(1/(a*inv(R)*a'));
+    w(:,i+91) = inv(R)*a'/(a*inv(R)*a');
 end
-y = zeros(1,121);
-sum = zeros(1,121);
-for i = 1 : 121
-    tmp = w(:,i)'*X;
-    F(:) = abs(fft(tmp,cnt));
-    max_tmp = 0;
-    max_pos = 0;
-    for j = 1 : cnt/2
-        if F(j) > max_tmp
-            max_tmp = F(j);
-            max_pos = j; 
-        end
-    end
-    y(i) = max_pos*para/32;
-    sum(i) = max_tmp^2;
+[~,target_theta] = findpeaks(p);
+cnt_target = length(target_theta);
+y = zeros(1,181);
+for i = 1 : cnt_target
+    tmp = w(:,target_theta(i))'*X;
+    F = abs(fft(tmp,cnt));
+    figure;
+    plot(F);
+    [~,pos] = max(F(1:cnt/2));
+    y(i) = pos*para/32;
 end
-z = zeros(121,2);
-for i = 1 : 121
-    z(i,1) = cos((i-61)/180*pi)*y(i);
-    z(i,2) = sin((i-61)/180*pi)*y(i);
+z = zeros(cnt_target,2);
+target_theta = target_theta - 90;
+for i = 1 : cnt_target
+    z(i,1) = sin(target_theta(i)/180*pi)*y(i);
+    z(i,2) = cos(target_theta(i)/180*pi)*y(i);
 end
-scatter(z(:,1),z(:,2),2,'filled');
-xlim([0 2]);
-ylim([-1 1]);
-point_plane = y;
+figure;
+plot(p);
+figure;
+scatter(z(:,1),z(:,2),20);
+xlim([-3 3]);
+ylim([0 5]);
 
 % Range FFT (1D-FFT)
 % rangeFFT = fft(rxData,numAdcSamples);
 % hanningWin = hanning(numAdcSamples); % numRangeBins = numAdcSamples
 % hanningWin = repmat(hanningWin,1,numChirps);
-% rangeFFT1 = fft(rx1.*hanningWin,numAdcSamples);%¶ÔÃ¿Ò»ÁĞ½øĞĞfft£¨¼ÓÁË´°£©
+% rangeFFT1 = fft(rx1.*hanningWin,numAdcSamples);%å¯¹æ¯ä¸€åˆ—è¿›è¡Œfftï¼ˆåŠ äº†çª—ï¼‰
 
 % Doppler FFT (2D-FFT)
-%RD_plane = fft(rangeFFT,numChirps,2);%¶ÔÃ¿Ò»ĞĞ½øĞĞfft
+%RD_plane = fft(rangeFFT,numChirps,2);%å¯¹æ¯ä¸€è¡Œè¿›è¡Œfft
 
 % plot
 % tmp = fftshift(abs(RD_plane),2);
 % imagesc(1:numChirps,x_axis,tmp);
 % xlabel('doppler'); ylabel('range'); title('2D FFT');
-end
+% end
