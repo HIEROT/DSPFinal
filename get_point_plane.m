@@ -1,19 +1,34 @@
-function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
-   sampleRate,freqSlopeConst,numChirps)
-%clc;clear all;close all;
-%load data_handblock1.mat
+%function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
+%   sampleRate,freqSlopeConst,numChirps)
+clc;clear all;close all;
+load data_handblock1.mat
 %load data_ceiling.mat
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%para:
+get_avr = 0;
+all_scan = 0;
+maxd = 2;
+chirp_num = 32;
+cnt = 256*32;
+gain_para = 80;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sampleRate = sampleRate*1000; % kbps->bps
 freqSlopeConst = freqSlopeConst*1e12; % MHz/us->Hz/s
 lightSpeed_meters_per_sec = 3e8;
 lambda = 3.9*1e-3;
-cnt = 256*32;
+
 len = lambda/2;
-para = (((1/numAdcSamples)*sampleRate)/freqSlopeConst)*lightSpeed_meters_per_sec/2/32;
+para = (((1/numAdcSamples)*sampleRate)/freqSlopeConst)*lightSpeed_meters_per_sec/2/chirp_num;
 x_dis = (0:cnt-1)*para;
 
-distanc_res = floor(1/para);
+distanc_res = floor(maxd/para);
+gain = zeros(1,181);
+for i = 1 : 181
+    gain(i) = 10^(15/90*abs(i-91)/gain_para);
+end
+figure;
+plot(gain);
 
 x1 = reshape(rx1,1,[]);
 x2 = reshape(rx2,1,[]);
@@ -38,12 +53,15 @@ for i = -90 : 90
     theta = i/180*pi;
     del = 2*pi*len*sin(theta)/lambda;
     a = [1, exp(1j*del), exp(2j*del), exp(3j*del)];
-    p(i+91) = abs(1/(a*R_inv*a'));
+    p(i+91) = abs(1/(a*R_inv*a'))*gain(i+91);
     w(:,i+91) =  R_inv*a'/(a*R_inv*a');
 end
-target_theta = zeros(0,0);
-for i = 1 : 181
-    target_theta = [target_theta,i];
+[~,target_theta] = findpeaks(p);
+if all_scan == 1
+    target_theta = zeros(0,0);
+    for i = 1 : 181
+        target_theta = [target_theta,i];
+    end
 end
 cnt_target = length(target_theta);
 y = zeros(1,181);
@@ -63,14 +81,21 @@ for i = 1 : cnt_target
         continue;
     end
     cnt_point = cnt_point + 1;
-    z(1,1) = z(1,1) + pi/2-target_theta(i)/180*pi;
-    z(1,2) = z(1,2) + y(i);
+    if get_avr == 1
+        z(1,1) = z(1,1) + pi/2-target_theta(i)/180*pi;
+        z(1,2) = z(1,2) + y(i);
+    else
+        z(cnt_point,1) = pi/2-target_theta(i)/180*pi;
+        z(cnt_point,2) = y(i);
+    end
 end
-z = z/cnt_point;
+if get_avr == 1
+    z = z/cnt_point;
+end
 figure;
 p = p/max(p);
 plot(p);
 figure;
 polarscatter(z(:,1),z(:,2),20);
 thetalim([0 180]);
-rlim([0 1.5]);
+rlim([0 maxd]);
