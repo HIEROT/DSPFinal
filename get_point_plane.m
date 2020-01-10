@@ -1,14 +1,14 @@
-%function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
-%   sampleRate,freqSlopeConst,numChirps)
-clc;clear all;close all;
-load data_handblock1.mat
+function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
+   sampleRate,freqSlopeConst,numChirps)
+%clc;clear all;close all;
+%load data_handblock.mat
 %load data_ceiling.mat
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %para:
 get_avr = 0;
-all_scan = 0;
-maxd = 2;
+scan_deg = 60;
+maxd = 1;
 chirp_num = 32;
 cnt = 256*32;
 gain_para = 80;
@@ -40,10 +40,7 @@ J = [0,0,0,1;
      0,1,0,0;
      1,0,0,0;];
 X = [X,J*conj(X)];
-R = zeros(4,4);
-for i = 1 : 2*cnt
-    R = R + X(:,i)*X(:,i)'/cnt/2;
-end
+R = X*X'/cnt;
 k_load = trace(R)/4;
 R = R + k_load*eye(4);
 R_inv = inv(R);
@@ -57,16 +54,18 @@ for i = -90 : 90
     w(:,i+91) =  R_inv*a'/(a*R_inv*a');
 end
 [~,target_theta] = findpeaks(p);
-if all_scan == 1
+target_theta = target_theta - 90;
+if scan_deg ~= 0
     target_theta = zeros(0,0);
-    for i = 1 : 181
-        target_theta = [target_theta,i];
+    for i = 91-scan_deg : 91+scan_deg
+        target_theta = [target_theta,i-90];
     end
 end
 cnt_target = length(target_theta);
 y = zeros(1,181);
+b = zeros(1,181);
 for i = 1 : cnt_target
-    tmp = w(:,target_theta(i))'*X;
+    tmp = w(:,target_theta(i)+91)'*X;
     F = abs(fft(tmp,cnt));
     % figure;
     % plot(x_dis,F);
@@ -74,7 +73,6 @@ for i = 1 : cnt_target
     y(i) = pos*para;
 end
 z = zeros(1,2);
-target_theta = target_theta - 90;
 cnt_point = 0;
 for i = 1 : cnt_target
     if y(i) < 0.1
@@ -95,6 +93,7 @@ end
 figure;
 p = p/max(p);
 plot(p);
+title('p');
 figure;
 polarscatter(z(:,1),z(:,2),20);
 thetalim([0 180]);
