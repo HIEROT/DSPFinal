@@ -1,14 +1,15 @@
-%function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
-%   sampleRate,freqSlopeConst,numChirps)
-clc;clear all;close all;
-load data_handblock.mat
-%load data_ceiling.mat
+function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
+   sampleRate,freqSlopeConst,numChirps)
+% clc;clear all;close all;
+% load data_handblock.mat
+% load data_ceiling.mat
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %para:
 plot_figure = 1;
 get_avr = 0;
 scan_deg = 60;
+res_deg = 5;
 maxd = 1;
 chirp_num = 32;
 cnt = 256*32;
@@ -60,6 +61,14 @@ if scan_deg ~= 0
     for i = 1 : 2*scan_deg+1
         target_theta(i) = i+89-scan_deg;
     end
+else
+    tmp = zeros(0,0);
+    for i = 1 : length(target_theta)
+        for j = -res_deg : res_deg
+            tmp = [tmp,target_theta(i)+j];
+        end
+    end
+    target_theta = tmp;
 end
 target_theta = target_theta - 90;
 cnt_target = length(target_theta);
