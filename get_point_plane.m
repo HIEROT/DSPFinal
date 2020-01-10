@@ -1,7 +1,7 @@
- function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
-    sampleRate,freqSlopeConst,numChirps)
+function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
+   sampleRate,freqSlopeConst,numChirps)
 % clc;clear all;close all;
-% load data_theta15deg_handblock.mat
+% load data_handblock.mat
 % load data_ceiling.mat
 
 % input1: rxData - [numAdcSamples,numChirps]
@@ -13,6 +13,7 @@ lambda = 3.9*1e-3;
 cnt = 256*32;
 len = lambda/2;
 para = (((1/numAdcSamples)*sampleRate)/freqSlopeConst)*lightSpeed_meters_per_sec/2/32;
+x_dis = (0:cnt-1)*para;
 
 distanc_res = floor(1.5/para);
 
@@ -47,22 +48,27 @@ for i = 1 : cnt_target
     tmp = w(:,target_theta(i))'*X;
     F = abs(fft(tmp,cnt));
     figure;
-    plot(F);
+    plot(x_dis,F);
     [~,pos] = max(F(1:min(distanc_res,cnt/2)));
     y(i) = pos*para;
 end
-z = zeros(cnt_target,2);
+z = zeros(1,2);
 target_theta = target_theta - 90;
+cnt_point = 0;
 for i = 1 : cnt_target
-    z(i,1) = sin(target_theta(i)/180*pi)*y(i);
-    z(i,2) = cos(target_theta(i)/180*pi)*y(i);
+    if y(i) < 0.1
+        continue;
+    end
+    cnt_point = cnt_point + 1;
+    z(cnt_point,1) = pi/2-target_theta(i)/180*pi;
+    z(cnt_point,2) = y(i);
 end
 figure;
 plot(p);
 figure;
-scatter(z(:,1),z(:,2),20);
-xlim([-3 3]);
-ylim([0 5]);
+polarscatter(z(:,1),z(:,2),20);
+thetalim([0 180]);
+rlim([0 2]);
 
 % Range FFT (1D-FFT)
 % rangeFFT = fft(rxData,numAdcSamples);
