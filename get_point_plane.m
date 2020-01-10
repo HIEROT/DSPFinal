@@ -13,7 +13,7 @@ len = lambda/2;
 para = (((1/numAdcSamples)*sampleRate)/freqSlopeConst)*lightSpeed_meters_per_sec/2/32;
 x_dis = (0:cnt-1)*para;
 
-distanc_res = floor(1.5/para);
+distanc_res = floor(1/para);
 
 x1 = reshape(rx1,1,[]);
 x2 = reshape(rx2,1,[]);
@@ -29,6 +29,8 @@ R = zeros(4,4);
 for i = 1 : 2*cnt
     R = R + X(:,i)*X(:,i)'/cnt/2;
 end
+k_load = trace(R)/4;
+R = R + k_load*eye(4);
 R_inv = inv(R);
 w = zeros(4,181);
 p = zeros(1,181);
@@ -61,9 +63,10 @@ for i = 1 : cnt_target
         continue;
     end
     cnt_point = cnt_point + 1;
-    z(cnt_point,1) = pi/2-target_theta(i)/180*pi;
-    z(cnt_point,2) = y(i);
+    z(1,1) = z(1,1) + pi/2-target_theta(i)/180*pi;
+    z(1,2) = z(1,2) + y(i);
 end
+z = z/cnt_point;
 figure;
 p = p/max(p);
 plot(p);
