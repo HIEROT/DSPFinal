@@ -1,8 +1,8 @@
-%function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
-%   sampleRate,freqSlopeConst,numChirps)
-clc;clear all;close all;
-load data_theta15deg_handblock.mat
-%load data_ceiling.mat
+function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
+   sampleRate,freqSlopeConst,numChirps)
+% clc;clear all;close all;
+% load data_theta15deg_handblock.mat
+% load data_ceiling.mat
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %para:
