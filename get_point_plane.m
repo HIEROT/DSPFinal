@@ -1,10 +1,8 @@
 function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
    sampleRate,freqSlopeConst,numChirps)
-% clc;clear all;close all;
-% load data_handblock.mat
-% load data_ceiling.mat
-
-% input1: rxData - [numAdcSamples,numChirps]
+%clc;clear all;close all;
+%load data_handblock1.mat
+%load data_ceiling.mat
 
 sampleRate = sampleRate*1000; % kbps->bps
 freqSlopeConst = freqSlopeConst*1e12; % MHz/us->Hz/s
@@ -41,14 +39,17 @@ for i = -90 : 90
     p(i+91) = abs(1/(a*R_inv*a'));
     w(:,i+91) =  R_inv*a'/(a*R_inv*a');
 end
-[~,target_theta] = findpeaks(p);
+target_theta = zeros(0,0);
+for i = 1 : 181
+    target_theta = [target_theta,i];
+end
 cnt_target = length(target_theta);
 y = zeros(1,181);
 for i = 1 : cnt_target
     tmp = w(:,target_theta(i))'*X;
     F = abs(fft(tmp,cnt));
-    figure;
-    plot(x_dis,F);
+    % figure;
+    % plot(x_dis,F);
     [~,pos] = max(F(1:min(distanc_res,cnt/2)));
     y(i) = pos*para;
 end
@@ -64,23 +65,9 @@ for i = 1 : cnt_target
     z(cnt_point,2) = y(i);
 end
 figure;
+p = p/max(p);
 plot(p);
 figure;
 polarscatter(z(:,1),z(:,2),20);
 thetalim([0 180]);
-rlim([0 2]);
-
-% Range FFT (1D-FFT)
-% rangeFFT = fft(rxData,numAdcSamples);
-% hanningWin = hanning(numAdcSamples); % numRangeBins = numAdcSamples
-% hanningWin = repmat(hanningWin,1,numChirps);
-% rangeFFT1 = fft(rx1.*hanningWin,numAdcSamples);%对每一列进行fft（加了窗）
-
-% Doppler FFT (2D-FFT)
-%RD_plane = fft(rangeFFT,numChirps,2);%对每一行进行fft
-
-% plot
-% tmp = fftshift(abs(RD_plane),2);
-% imagesc(1:numChirps,x_axis,tmp);
-% xlabel('doppler'); ylabel('range'); title('2D FFT');
-% end
+rlim([0 1.5]);
