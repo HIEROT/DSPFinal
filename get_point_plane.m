@@ -6,7 +6,7 @@ function z = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
 %para:
 get_avr = 1;
 all_scan = 1;
-maxd = 2;
+maxd = 1.2;
 cnt = 192*numChirps;
 gain_para = 80;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
