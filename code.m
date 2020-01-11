@@ -15,6 +15,10 @@ loadCfg = 1;%上电后或者改变波形参数后第一次采集数据置为1
 cnt = 120;
 arr = [];
 
+%debug
+global cc;
+cc = 1;
+%
 % [readBufferTime,numAdcSamples,sampleRate,freqSlopeConst,numChirps] = ...
 %     getRawData(cfgFileName,comportStandardNum,comportEnhancedNum,loadCfg);
 
@@ -144,20 +148,24 @@ else
     radarReply = fscanf(spCliHandle);
     pause(0);
     readBufferTime = datetime;
+    bytevec = [];
     fprintf(spCliHandle,'sensorStart');
     fprintf('%s\n','sensorStart');
     radarReply = fscanf(spCliHandle);
-    disp(radarReply);
+%     disp(radarReply);
 end
 
 %% debug
-% numChirps = 10;
+    cc = 1;
+    
+%     numChirps = 10;
 %%
 
 while 1
     if size(bytevec,2) >= numChirps*4
 %         set(sphandle,'BytesAvailableFcn',@readNothing);
     bytevec1 = bytevec;
+    
         break
     end
     if readDataFlag == 0
@@ -183,6 +191,7 @@ while 1
 end
 
 fprintf(spCliHandle,'sensorStop');
+disp('sensorStop');
 
 disp('out of while')
 bytevec1 = bytevec;
@@ -209,7 +218,7 @@ rx2 = reshape(rx2,1,[]);
 rx3 = reshape(rx3,1,[]);
 rx4 = reshape(rx4,1,[]);
 adcData = [rx1;rx2;rx3;rx4];
-bytevec = [];
+
 %%
 
 loadCfg = 0;
@@ -234,7 +243,7 @@ rx4 = reshape(adcData(4,:),numAdcSamples,[]);
 % 峰值对应了目标的距离和 速度
 
 z = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,sampleRate,freqSlopeConst,numChirps);
-z_ref = pos2ind(z)
+[z_ref,k] = pos2ind(z)
 polarscatter([z_ref(:,1)],[z_ref(:,2)],10);
 thetalim([0 180]);
 rlim([0 2]);
@@ -303,13 +312,12 @@ function [] = readData(obj,event) %#ok<*INUSD>
     global readBufferTime;
     global readDataFlag;
     [tempvec,~] = fread(obj,numSamples_perRx_perChirp,'uint8');
-    
+    %debug
+    global cc
+    disp(['new read', num2str(cc)])
+    cc = cc+1;
+    %endofdebug
     bytevec = [bytevec,tempvec];
     readBufferTime = datetime;
     readDataFlag = 1;
-end
-
-
-function [] = readNothing(obj,event)
-
 end

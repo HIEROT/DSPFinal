@@ -1,4 +1,4 @@
-function z_ref = pos2ind(z)
+function [z_ref,k] = pos2ind(z)
     polars = [2.1119,0.1436;
 0.9826,0.1482;
 2.0691,0.2842;
@@ -16,6 +16,7 @@ z_in = [z(:,1)*cos(z(:,2)),z(:,1)*sin(z(:,2))];
     z_in
     if (~isnan(z(:,1)))
         z_ref = polars(k,:)
+        k = 0;
     else
         z_ref = z;
     end
