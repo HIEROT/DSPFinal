@@ -1,19 +1,19 @@
 function point_plane = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,...
    sampleRate,freqSlopeConst,numChirps)
-% clc;clear all;close all;
-% load data_handblock.mat
-% load data_ceiling.mat
+%clc;clear all;close all;
+%load data_theta15deg_handblock.mat
+%load data_ceiling.mat
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %para:
 plot_figure = 1;
-get_avr = 0;
+get_avr = 1;
 scan_deg = 60;
 res_deg = 5;
 maxd = 1;
 chirp_num = 32;
 cnt = 256*32;
-gain_para = 80;
+gain_para = 70;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sampleRate = sampleRate*1000; % kbps->bps
 freqSlopeConst = freqSlopeConst*1e12; % MHz/us->Hz/s
