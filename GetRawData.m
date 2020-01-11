@@ -16,6 +16,7 @@ adcData = [];
 numChirps = 0;
 
 global bytevec;
+global cnt;
 bytevec = [];
 global numSamples_perRx_perChirp;
 global readBufferTime;
@@ -133,7 +134,7 @@ else
 end
 
 while 1
-    if size(bytevec,2) == numChirps*4
+    if cnt == numChirps*4
         break
     end
     if readDataFlag == 0
@@ -228,8 +229,10 @@ function [] = readData(obj,event) %#ok<*INUSD>
     global numSamples_perRx_perChirp;
     global readBufferTime;
     global readDataFlag;
+    global cnt;
     [tempvec,~] = fread(obj,numSamples_perRx_perChirp,'uint8');
     bytevec = [bytevec,tempvec];
+    cnt = cnt + size(tempvec,2);
     readBufferTime = datetime;
     readDataFlag = 1;
 end
