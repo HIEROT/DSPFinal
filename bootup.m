@@ -1,5 +1,5 @@
 function [sphandle, spCliHandle,numAdcSamples, numAdcSamples_t, numChirps, sampleRate, freqSlopeConst] = bootup()
-    clear all;clc;close all;
+
 % 可更改参数
 cfgFileName = 'profile2.cfg';
 comportStandardNum = 5;%USB端口号
@@ -10,7 +10,7 @@ comportDataNum = comportEnhancedNum;
 loadCfg = 1;%上电后或者改变波形参数后第一次采集数据置为1
 
 %debug
-global cc;
+persistent cc;
 cc = 1;
 
 
@@ -18,10 +18,10 @@ cc = 1;
 
 numChirps = 0;
 
-global bytevec;
+persistent bytevec;
 bytevec = [];
-global numSamples_perRx_perChirp;
-global readDataFlag;
+persistent numSamples_perRx_perChirp;
+persistent readDataFlag;
 readDataFlag = 0;
 
 cfgFileId = fopen(cfgFileName,'r');
@@ -122,10 +122,10 @@ tStart = tic;
         end
     end
 %%
-end
+
 
 function [sphandle] = configureSport(comportSnum)
-    global numSamples_perRx_perChirp;
+    
     % 释放被占用的串口
     if ~isempty(instrfind('Type','serial'))
         disp('Serial port(s) already open. Re-initializing...');
@@ -161,17 +161,14 @@ function [] = dispError()
 end
 
 function [] = readData(obj,event) %#ok<*INUSD>
-    global bytevec;
-    global numSamples_perRx_perChirp;
-    global readBufferTime;
-    global readDataFlag;
     [tempvec,~] = fread(obj,numSamples_perRx_perChirp,'uint8');
     %debug
-    global cc
     disp(['new read', num2str(cc)])
     cc = cc+1;
     %endofdebug
     bytevec = [bytevec,tempvec];
     readBufferTime = datetime;
     readDataFlag = 1;
+end
+
 end
