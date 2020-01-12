@@ -27,9 +27,9 @@ z_in = [z(:,1)*cos(z(:,2)),z(:,1)*sin(z(:,2))];
     z_in
     if (~isnan(z(:,1)))
         z_ref = polars(k,:)
-        k = 0;
     else
         z_ref = z;
+        k = 0;
     end
 
 end

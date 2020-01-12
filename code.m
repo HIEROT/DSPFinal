@@ -14,6 +14,7 @@ loadCfg = 1;%上电后或者改变波形参数后第一次采集数据置为1
 % 重复计算
 cnt = 120;
 arr = [];
+k_last = 0;
 
 %debug
 global cc;
@@ -247,6 +248,9 @@ z = get_point_plane(rx1,rx2,rx3,rx4,numAdcSamples,sampleRate,freqSlopeConst,numC
 polarscatter([z_ref(:,1)],[z_ref(:,2)],10);
 thetalim([0 180]);
 rlim([0 2]);
+
+sound2(k,k_last)
+k_last = k;
 
 % arr = [arr;z];
 % polarscatter(arr(:,1),arr(:,2),5)
